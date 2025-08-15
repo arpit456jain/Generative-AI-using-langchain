@@ -20,7 +20,8 @@ model = ChatHuggingFace(llm=llm)
 
 # loader = PyPDFLoader('dl-curriculum.pdf')
 # Streamlit UI
-st.header('Summary Generator Tool')
+st.header('📄 PDF Summary & Chat Tool')
+pdf_text = ""  # Store PDF text globally in app
 # Upload PDF
 uploaded_file = st.file_uploader("Upload your PDF", type=["pdf"])
 if uploaded_file is not None:
@@ -41,3 +42,18 @@ if st.button("Summarize"):
         result = model.invoke(prompt)
         st.subheader("📌 Summary")
         st.write(result.content if hasattr(result, "content") else result)
+
+
+# Chat with PDF
+if pdf_text:
+    st.subheader("💬 Ask Questions About the PDF")
+    user_question = st.text_input("Enter your question:")
+    if st.button("Ask"):
+        if user_question.strip():
+            text_to_use = pdf_text[:4000] if len(pdf_text) > 4000 else pdf_text
+            chat_prompt = f"Answer the following question based ONLY on the provided PDF content.\n\nPDF Content:\n{text_to_use}\n\nQuestion: {user_question}"
+            chat_result = model.invoke(chat_prompt)
+            st.subheader("🤖 Answer")
+            st.write(chat_result.content if hasattr(chat_result, "content") else chat_result)
+        else:
+            st.warning("Please type a question.")
